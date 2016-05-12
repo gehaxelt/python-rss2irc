@@ -1,0 +1,18 @@
+insert into feeds (name, url, frequency) values ('SecurityFocus Vulnerabilities', 'http://www.securityfocus.com/rss/vulnerabilities.xml', 15);
+insert into feeds (name, url, frequency) values ('Project Zero', 'http://googleprojectzero.blogspot.com/feeds/posts/default', 15);
+insert into feeds (name, url, frequency) values ('Packet Storm', 'https://rss.packetstormsecurity.com/', 15);
+insert into feeds (name, url, frequency) values ('Schneier on Security', 'https://www.schneier.com/blog/atom.xml', 15);
+insert into feeds (name, url, frequency) values ('Dan Kaminskys Blog', 'https://dankaminsky.com/feed/', 15);
+insert into feeds (name, url, frequency) values ('Full Disclosure', 'http://seclists.org/rss/fulldisclosure.rss', 15);
+insert into feeds (name, url, frequency) values ('Bugtraq', 'http://seclists.org/rss/bugtraq.rss', 15);
+insert into feeds (name, url, frequency) values ('Exploit-DB Updates', 'https://www.exploit-db.com/rss.xml', 15);
+insert into feeds (name, url, frequency) values ('Foxglovesecurity', 'https://foxglovesecurity.com/feed/', 15);
+insert into feeds (name, url, frequency) values ('Debian Security','https://www.debian.org/security/dsa', 15);
+insert into feeds (name, url, frequency) values ('Ubuntu Security Notices','http://www.ubuntu.com/usn/atom.xml', 15);
+insert into feeds (name, url, frequency) values ('FreeBSD Security Advisories','http://www.freebsd.org/security/rss.xml', 15);
+insert into feeds (name, url, frequency) values ('US-CERT Alerts','http://www.us-cert.gov/ncas/alerts.xml', 15);
+insert into feeds (name, url, frequency) values ('National Vulnerability Database','https://nvd.nist.gov/download/nvd-rss.xml', 15);
+insert into feeds (name, url, frequency) values ('lcamtufs blog','https://lcamtuf.blogspot.com/feeds/posts/default',15);
+insert into feeds (name, url, frequency) values ('Errata Security','http://blog.erratasec.com/feeds/posts/default',15);
+insert into feeds (name, url, frequency) values ('Krebs on Security','http://krebsonsecurity.com/feed/',15);
+insert into feeds (name, url, frequency) values ('Have I been pwned? latest breaches','http://feeds.feedburner.com/HaveIBeenPwnedLatestBreaches',15);
