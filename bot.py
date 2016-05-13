@@ -65,7 +65,7 @@ class IRCBot(irc.client.SimpleIRCClient):
 
             # Else tell the user how to use the bot
             else:
-                answer = self.__help_msg()
+                answer = "Use !help for possible commands."
         except Exception as e:
             print e
             answer = "Something went wrong :("
