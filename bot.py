@@ -50,7 +50,7 @@ class IRCBot(irc.client.SimpleIRCClient):
             # Print last 25 news. 
             elif msg == "!last":
                 answer = ""
-                for entry in self.__db.get_latest_news():
+                for entry in self.__db.get_latest_news()[::-1]:
                     answer += "#" + str(entry[0]) + ": " + entry[1] + ", " + entry[2] + ", " + entry[3] + "\n"
 
             # Print last 25 news for a specific feed
@@ -60,7 +60,7 @@ class IRCBot(irc.client.SimpleIRCClient):
                     feedid = int(msg.replace("!lastfeed","").strip())
                 except:
                     return "Wrong command: " + msg + ", use: !lastfeed <feedid>"
-                for entry in self.__db.get_news_from_feed(feedid):
+                for entry in self.__db.get_news_from_feed(feedid)[::-1]:
                     answer += "#" + str(entry[0]) + ": " + entry[1] + ", " + entry[2] + ", " + entry[3] + "\n"
 
             # Else tell the user how to use the bot
