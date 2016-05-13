@@ -43,6 +43,14 @@ Proceed with the installation of all dependencies:
 pip install -r requirements.txt
 ```
 
+If you get an error that `sqlite3worker` couldn't be installed, use 
+
+```
+pip install git+https://github.com/palantir/sqlite3worker#egg=sqlite3worker
+```
+
+and retry the installation.
+
 Copy the sample files:
 
 ```
