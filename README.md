@@ -74,3 +74,7 @@ sqlite3 feeds.db < feeds.sql
 ```
 
 And restart the bot.
+
+# License
+
+See [LICENSE](./LICENSE.md) for more information.
