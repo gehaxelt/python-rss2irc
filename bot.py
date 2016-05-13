@@ -108,13 +108,12 @@ class IRCBot(irc.client.SimpleIRCClient):
                 # Split lines that are longer than 510 characters into multiple messages.
                 for sub_line in re.findall('.{1,510}', line):
                     self.connection.privmsg(target, sub_line)
-                    time.sleep(0.3) # Don't flood the target
+                    time.sleep(1) # Don't flood the target
         except Exception as e:
             print e
 
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
-        time.sleep(0.5) # Don't flood the channel
         try:
             msg = feed_name + ": " + title + ", " + url + ", " + date
             self.send_msg(self.__config.CHANNEL, msg)
