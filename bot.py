@@ -138,6 +138,7 @@ class Bot(object):
         self.__config = Config()
         self.__irc = IRCBot(self.__config, self.__db, self.on_started)
         self.__threads = []
+        self.__connected = False
 
     def start(self):
         """Starts the IRC bot"""
@@ -145,14 +146,16 @@ class Bot(object):
 
     def on_started(self):
         """Gets executed after the IRC thread has successfully established a connection."""
-        print "Connected!"
+        if not self.__connected:
+            print "Connected!"
 
-        # Start one fetcher thread per feed
-        for feed in self.__db.get_feeds():
-            t = threading.Thread(target=self.__fetch_feed, args=(feed,))
-            t.start()
-            self.__threads.append(t)
-        print "Started fetcher threads!"
+            # Start one fetcher thread per feed
+            for feed in self.__db.get_feeds():
+                t = threading.Thread(target=self.__fetch_feed, args=(feed,))
+                t.start()
+                self.__threads.append(t)
+            print "Started fetcher threads!"
+            self.__connected = True
 
     def __fetch_feed(self, feed_info):
         """Fetches a RSS feed, parses it and updates the database and/or announces new news."""
