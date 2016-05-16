@@ -7,6 +7,7 @@ import tinyurl
 import time
 import re
 import feedparser
+from colour import Colours
 from db import FeedDB
 from config import Config
 
@@ -17,6 +18,9 @@ class IRCBot(irc.client.SimpleIRCClient):
         self.__db = db
         self.connect(self.__config.HOST, self.__config.PORT, self.__config.NICK)
         self.__on_connect_cb = on_connect_cb
+        self.num_col = self.__config.num_col
+        self.date = self.__config.date
+        self.feedname = self.__config.feedname
 
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
@@ -25,7 +29,7 @@ class IRCBot(irc.client.SimpleIRCClient):
 
     def on_join(self, connection, event):
         """Say hello to other people in the channel. """
-        connection.privmsg(self.__config.CHANNEL, "Hi, I'm " + connection.get_nickname() + " and your bot. Send !help to get a list of commands.")
+        connection.privmsg(self.__config.CHANNEL, "Hi, I'm " + Colours('3',str(connection.get_nickname())).get() + " your bot. Send " + Colours(self.num_col,"!help").get() +" to get a list of commands.")
         self.__on_connect_cb()
 
     def __handle_msg(self, msg):
@@ -39,19 +43,19 @@ class IRCBot(irc.client.SimpleIRCClient):
             elif msg == "!list":
                 answer = ""
                 for entry in self.__db.get_feeds():
-                    answer += "#" + str(entry[0]) + ": " + entry[1] + ", " + entry[2] + ", updated every " + str(entry[3]) + " min" + "\n"
+                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + Colours(self.date,", updated every ").get() + Colours(self.num_col,str(entry[3])).get() + Colours(self.date," min").get() + "\n"
 
             # Print some simple stats (Feed / News count)
             elif msg == "!stats":
                 feeds_count = self.__db.get_feeds_count()
                 news_count = self.__db.get_news_count()
-                answer = "Feeds: " + str(feeds_count) + ", News: " + str(news_count)
+                answer = "Feeds: " + Colours(self.num_col,str(feeds_count)).get() + ", News: " + Colours(self.num_col,str(news_count)).get()
 
             # Print last 25 news. 
             elif msg == "!last":
                 answer = ""
                 for entry in self.__db.get_latest_news()[::-1]:
-                    answer += "#" + str(entry[0]) + ": " + entry[1] + ", " + entry[2] + ", " + entry[3] + "\n"
+                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,entry[3]).get() + "\n"
 
             # Print last 25 news for a specific feed
             elif msg.startswith("!lastfeed"):
@@ -59,9 +63,9 @@ class IRCBot(irc.client.SimpleIRCClient):
                 try:
                     feedid = int(msg.replace("!lastfeed","").strip())
                 except:
-                    return "Wrong command: " + msg + ", use: !lastfeed <feedid>"
+                    return Colours('1',"Wrong command: ").get() + msg + ", use: !lastfeed <feedid>"
                 for entry in self.__db.get_news_from_feed(feedid)[::-1]:
-                    answer += "#" + str(entry[0]) + ": " + entry[1] + ", " + entry[2] + ", " + entry[3] + "\n"
+                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,str(entry[3])).get() + "\n"
 
             # Else tell the user how to use the bot
             else:
@@ -115,7 +119,7 @@ class IRCBot(irc.client.SimpleIRCClient):
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
         try:
-            msg = feed_name + ": " + title + ", " + url + ", " + date
+            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + url + ", " + Colours(self.date,str(date)).get()
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
             print e
@@ -170,6 +174,7 @@ class Bot(object):
                     newsurl = tinyurl.create_one(newsitem.link) # Create a short link
                     if newsurl == "Error": #If that fails, use the long version
                         newsurl = newsitem.link
+                    newsurl = Colours('', newsurl).get()
 
                     # Try to get the published date. Otherwise set it to 'no date'
                     try:
@@ -185,10 +190,10 @@ class Bot(object):
                     if is_new:
                         self.__irc.post_news(feed_info[1], newstitle, newsurl, newsdate)
 
-                print "Updated: " + feed_info[1]
+                print Colours('7',"Updated: ").get() + feed_info[1]
             except Exception as e:
                 print e
-                print "Failed: " + feed_info[1]
+                print Colours('1',"Failed: ").get() + feed_info[1]
 
             # sleep frequency minutes
             time.sleep(int(feed_info[3])*60) 

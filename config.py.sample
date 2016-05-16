@@ -8,3 +8,11 @@ class Config(object):
         self.CHANNEL = "##YOURCHANNEL"
         self.NICK = "YOURBOTNICK"
         self.admin_nicks= ['YOURADMINNICK']
+        #=Colours=
+        #1 - red		2 - green	3 - yellow
+        #4 - blue		5 - purple  6 - cyan
+        #7 - lightgreen 8 - grey	9 - pink
+        #10 - lighblue
+        self.num_col = '1'
+        self.date = '8'
+        self.feedname = '2'
