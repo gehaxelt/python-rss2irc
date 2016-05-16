@@ -30,8 +30,8 @@ class Colours:
 		else:
 			return '\033[1;37m'+self.ret
 
-#Testing
-
+"""
 if __name__ == "__main__":
 	for i in range(0, 11):
 		print Colours(str(i), 'Testing').get() + "TESTING "+Colours(str(i), 'wat').get()
+"""
