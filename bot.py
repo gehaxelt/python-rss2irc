@@ -132,8 +132,8 @@ Help:
     - !help         Prints this help
     - !list         Prints all feeds
     - !stats        Prints some statistics
-    - !last         Prints the last 25 entries
-    - !lastfeed <feedid> Prints the last 25 entries from a specific feed
+    - !last         Prints the last 10 entries
+    - !lastfeed <feedid> Prints the last 10 entries from a specific feed
 """
 
 class Bot(object):
