@@ -12,6 +12,6 @@ jaraco.text==1.6.3
 more-itertools==2.2
 pytz==2016.4
 six==1.10.0
-sqlite3worker==1.0
+git+https://github.com/palantir/sqlite3worker#egg=sqlite3worker
 tempora==1.4
 TinyUrl==0.1.0
