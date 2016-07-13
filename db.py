@@ -33,14 +33,14 @@ class FeedDB(object):
             feeds.append(feed)
         return feeds
 
-    def get_news_from_feed(self, feed_id, limit=25):
+    def get_news_from_feed(self, feed_id, limit=10):
         """Returns 'limit' news from a specific feed"""
         news = []
         for item in self.__db_worker.execute("select id, title, url, published from news where feedid = :feedid limit :limit", {'feedid': feed_id, 'limit':limit}):
             news.append(item)
         return news
 
-    def get_latest_news(self, limit=25):
+    def get_latest_news(self, limit=10):
         """Returns 'limit' latest news"""
         news = []
         for item in self.__db_worker.execute("select id, title, url, published from news order by id desc limit :limit", {'limit':limit}):
