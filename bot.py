@@ -21,6 +21,7 @@ class IRCBot(irc.client.SimpleIRCClient):
         self.num_col = self.__config.num_col
         self.date = self.__config.date
         self.feedname = self.__config.feedname
+        self.shorturls = self.__config.shorturls
 
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
@@ -171,8 +172,11 @@ class Bot(object):
                 # Reverse the ordering. Oldest first.
                 for newsitem in news.entries[::-1]:
                     newstitle = newsitem.title
-                    newsurl = tinyurl.create_one(newsitem.link) # Create a short link
-                    if newsurl == "Error": #If that fails, use the long version
+                    if self.config.shorturls
+                        newsurl = tinyurl.create_one(newsitem.link) # Create a short link
+                        if newsurl == "Error": #If that fails, use the long version
+                            newsurl = newsitem.link
+                    else
                         newsurl = newsitem.link
 
                     # Try to get the published date. Otherwise set it to 'no date'
