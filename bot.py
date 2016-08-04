@@ -119,7 +119,7 @@ class IRCBot(irc.client.SimpleIRCClient):
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
         try:
-            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + url + ", " + Colours(self.date,str(date)).get()
+            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + Colours('',url).get() + ", " + Colours(self.date,str(date)).get()
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
             print e
@@ -174,7 +174,6 @@ class Bot(object):
                     newsurl = tinyurl.create_one(newsitem.link) # Create a short link
                     if newsurl == "Error": #If that fails, use the long version
                         newsurl = newsitem.link
-                    newsurl = Colours('', newsurl).get()
 
                     # Try to get the published date. Otherwise set it to 'no date'
                     try:
