@@ -186,7 +186,7 @@ class Bot(object):
                             newsdate = "no date"
 
                     # Update the database. If it's a new issue, post it to the channel
-                    is_new = self.__db.insert_news(feed_info[0], newstitle, newsurl, newsdate)
+                    is_new = self.__db.insert_news(feed_info[0], newstitle, newsitem.link, newsdate)
                     if is_new:
                         self.__irc.post_news(feed_info[1], newstitle, newsurl, newsdate)
 
