@@ -59,7 +59,7 @@ class FeedDB(object):
 
     def insert_news(self, feed_id, title, url, published):
         """Checks if a news item with the given information exists. If not, create a new entry."""
-        exists = self.__db_worker.execute("select exists(select 1 FROM news WHERE feedid = :feedid and title = :title LIMIT 1)", {'feedid': feed_id, 'title': title})[0][0]
+        exists = self.__db_worker.execute("select exists(select 1 FROM news WHERE feedid = :feedid and url = :url and published = :published LIMIT 1)", {'feedid': feed_id, 'url': url, 'published': published})[0][0]
         if exists:
             return False
         self.__db_worker.execute("INSERT INTO news (title, url, feedid, published) VALUES (:title, :url, :feedid, :published)", {'title': title, 'url': url, 'feedid': feed_id, 'published': published})
