@@ -190,10 +190,10 @@ class Bot(object):
                     if is_new:
                         self.__irc.post_news(feed_info[1], newstitle, newsurl, newsdate)
 
-                print Colours('7',"Updated: ").get() + feed_info[1]
+                print "Updated: " + feed_info[1]
             except Exception as e:
                 print e
-                print Colours('1',"Failed: ").get() + feed_info[1]
+                print "Failed: " + feed_info[1]
 
             # sleep frequency minutes
             time.sleep(int(feed_info[3])*60) 
