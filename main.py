@@ -12,5 +12,5 @@ if __name__ == "__main__":
     bot = Bot()
     bot.start()
     signal.signal(signal.SIGINT, signal_handler)
-    while Ture:
+    while True:
         signal.pause()
