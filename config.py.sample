@@ -16,3 +16,4 @@ class Config(object):
         self.num_col = '1'
         self.date = '8'
         self.feedname = '2'
+        self.shorturls = False

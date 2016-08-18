@@ -21,6 +21,7 @@ class IRCBot(irc.client.SimpleIRCClient):
         self.num_col = self.__config.num_col
         self.date = self.__config.date
         self.feedname = self.__config.feedname
+        self.shorturls = self.__config.shorturls
 
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
@@ -119,7 +120,7 @@ class IRCBot(irc.client.SimpleIRCClient):
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
         try:
-            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + url + ", " + Colours(self.date,str(date)).get()
+            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + Colours('',url).get() + ", " + Colours(self.date,str(date)).get()
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
             print e
@@ -171,10 +172,12 @@ class Bot(object):
                 # Reverse the ordering. Oldest first.
                 for newsitem in news.entries[::-1]:
                     newstitle = newsitem.title
-                    newsurl = tinyurl.create_one(newsitem.link) # Create a short link
-                    if newsurl == "Error": #If that fails, use the long version
+                    if self.config.shorturls
+                        newsurl = tinyurl.create_one(newsitem.link) # Create a short link
+                        if newsurl == "Error": #If that fails, use the long version
+                            newsurl = newsitem.link
+                    else
                         newsurl = newsitem.link
-                    newsurl = Colours('', newsurl).get()
 
                     # Try to get the published date. Otherwise set it to 'no date'
                     try:
@@ -186,7 +189,7 @@ class Bot(object):
                             newsdate = "no date"
 
                     # Update the database. If it's a new issue, post it to the channel
-                    is_new = self.__db.insert_news(feed_info[0], newstitle, newsurl, newsdate)
+                    is_new = self.__db.insert_news(feed_info[0], newstitle, newsitem.link, newsdate)
                     if is_new:
                         self.__irc.post_news(feed_info[1], newstitle, newsurl, newsdate)
 
