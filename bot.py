@@ -172,11 +172,11 @@ class Bot(object):
                 # Reverse the ordering. Oldest first.
                 for newsitem in news.entries[::-1]:
                     newstitle = newsitem.title
-                    if self.config.shorturls
+                    if self.__config.shorturls:
                         newsurl = tinyurl.create_one(newsitem.link) # Create a short link
                         if newsurl == "Error": #If that fails, use the long version
                             newsurl = newsitem.link
-                    else
+                    else:
                         newsurl = newsitem.link
 
                     # Try to get the published date. Otherwise set it to 'no date'
