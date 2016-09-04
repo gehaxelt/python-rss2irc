@@ -17,3 +17,4 @@ class Config(object):
         self.date = '8'
         self.feedname = '2'
         self.shorturls = False
+        self.dateformat = '%Y-%m-%d %H:%M:%S %z'
