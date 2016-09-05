@@ -7,6 +7,8 @@ import tinyurl
 import time
 import re
 import feedparser
+import datetime
+import dateutil.parser
 from colour import Colours
 from db import FeedDB
 from config import Config
@@ -22,6 +24,7 @@ class IRCBot(irc.client.SimpleIRCClient):
         self.date = self.__config.date
         self.feedname = self.__config.feedname
         self.shorturls = self.__config.shorturls
+        self.dateformat = self.__config.dateformat
 
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
@@ -179,12 +182,20 @@ class Bot(object):
                     else:
                         newsurl = newsitem.link
 
-                    # Try to get the published date. Otherwise set it to 'no date'
+                    # Try to get the published or updated date. Otherwise set it to 'no date'
                     try:
-                        newsdate = newsitem.published
+                        # Get date and parse it
+                        newsdate = dateutil.parser.parse(newsitem.published)
+                        # Format date based on 'dateformat' in config.py
+                        newsdate = newsdate.strftime(self.__config.dateformat)
+
                     except Exception as e:
                         try:
-                            newsdate = newsitem.updated
+                            # Get date and parse it
+                            newsdate = dateutil.parser.parse(newsitem.updated)
+                            # Format date based on 'dateformat' in config.py
+                            newsdate = newsdate.strftime(self.__config.dateformat)
+
                         except Exception as e:
                             newsdate = "no date"
 
