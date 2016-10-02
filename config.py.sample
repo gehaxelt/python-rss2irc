@@ -5,6 +5,7 @@ class Config(object):
     def __init__(self):
         self.HOST = "irc.freenode.org"
         self.PORT = 6667
+        self.PASSWORD = None
         self.CHANNEL = "##YOURCHANNEL"
         self.NICK = "YOURBOTNICK"
         self.admin_nicks= ['YOURADMINNICK']

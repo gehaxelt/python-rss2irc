@@ -19,7 +19,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.__config = config
         self.__db = db
         self.__on_connect_cb = on_connect_cb
-        self.__servers = [irc.bot.ServerSpec(self.__config.HOST, self.__config.PORT)]
+        self.__servers = [irc.bot.ServerSpec(self.__config.HOST, self.__config.PORT, self.__config.PASSWORD)]
         self.num_col = self.__config.num_col
         self.date = self.__config.date
         self.feedname = self.__config.feedname
