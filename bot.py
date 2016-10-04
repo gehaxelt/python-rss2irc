@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import ssl
 import threading
-import irc.client
 import irc.bot
+import irc.client
+import irc.connection
 import tinyurl
 import time
 import re
@@ -25,7 +27,12 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.feedname = self.__config.feedname
         self.shorturls = self.__config.shorturls
         self.dateformat = self.__config.dateformat
-        super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK)
+
+        if self.__config.SSL:
+            ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
+            super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK, connect_factory=ssl_factory)
+        else:
+            super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK)
 
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
@@ -56,7 +63,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 news_count = self.__db.get_news_count()
                 answer = "Feeds: " + Colours(self.num_col,str(feeds_count)).get() + ", News: " + Colours(self.num_col,str(news_count)).get()
 
-            # Print last 25 news. 
+            # Print last 25 news.
             elif msg == "!last":
                 answer = ""
                 for entry in self.__db.get_latest_news()[::-1]:
@@ -101,7 +108,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         # Get the message. We are only interested in "!help"
         msg = event.arguments[0].lower().strip()
 
-        # Send the answer as a private message 
+        # Send the answer as a private message
         if msg == "!help":
             self.send_msg(event.source.nick, self.__help_msg())
 
@@ -211,4 +218,4 @@ class Bot(object):
                 print "Failed: " + feed_info[1]
 
             # sleep frequency minutes
-            time.sleep(int(feed_info[3])*60) 
+            time.sleep(int(feed_info[3])*60)
