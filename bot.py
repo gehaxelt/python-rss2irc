@@ -3,6 +3,7 @@
 
 import ssl
 import threading
+import irc.bot
 import irc.client
 import irc.connection
 import tinyurl
@@ -15,22 +16,23 @@ from colour import Colours
 from db import FeedDB
 from config import Config
 
-class IRCBot(irc.client.SimpleIRCClient):
+class IRCBot(irc.bot.SingleServerIRCBot):
     def __init__(self, config, db, on_connect_cb):
-        irc.client.SimpleIRCClient.__init__(self)
         self.__config = config
         self.__db = db
-        if self.__config.SSL:
-            ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
-            self.connect(self.__config.HOST, self.__config.PORT, self.__config.NICK, connect_factory=ssl_factory)
-        else:
-            self.connect(self.__config.HOST, self.__config.PORT, self.__config.NICK)
         self.__on_connect_cb = on_connect_cb
+        self.__servers = [irc.bot.ServerSpec(self.__config.HOST, self.__config.PORT, self.__config.PASSWORD)]
         self.num_col = self.__config.num_col
         self.date = self.__config.date
         self.feedname = self.__config.feedname
         self.shorturls = self.__config.shorturls
         self.dateformat = self.__config.dateformat
+
+        if self.__config.SSL:
+            ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
+            super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK, connect_factory=ssl_factory)
+        else:
+            super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK)
 
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
