@@ -10,6 +10,7 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
     bot = Bot()
+    bot._Bot__irc.connection.buffer_class.errors = 'replace' # prevent utf-8 error in jaraco.stream
     bot.start()
     signal.signal(signal.SIGINT, signal_handler)
     while True:
