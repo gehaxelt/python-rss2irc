@@ -27,6 +27,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.feedname = self.__config.feedname
         self.shorturls = self.__config.shorturls
         self.dateformat = self.__config.dateformat
+        self.url = self.__config.url
 
         if self.__config.SSL:
             ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
@@ -55,7 +56,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             elif msg == "!list":
                 answer = ""
                 for entry in self.__db.get_feeds():
-                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + Colours(self.date,", updated every ").get() + Colours(self.num_col,str(entry[3])).get() + Colours(self.date," min").get() + "\n"
+                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours(self.url,str(entry[2])).get() + Colours(self.date,", updated every ").get() + Colours(self.num_col,str(entry[3])).get() + Colours(self.date," min").get() + "\n"
 
             # Print some simple stats (Feed / News count)
             elif msg == "!stats":
@@ -63,13 +64,13 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 news_count = self.__db.get_news_count()
                 answer = "Feeds: " + Colours(self.num_col,str(feeds_count)).get() + ", News: " + Colours(self.num_col,str(news_count)).get()
 
-            # Print last 25 news.
+            # Print last 10 news.
             elif msg == "!last":
                 answer = ""
                 for entry in self.__db.get_latest_news()[::-1]:
-                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,entry[3]).get() + "\n"
+                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours(self.url,str(entry[2])).get() + ", " + Colours(self.date,str(entry[3])).get() + "\n"
 
-            # Print last 25 news for a specific feed
+            # Print last 10 news for a specific feed
             elif msg.startswith("!lastfeed"):
                 answer = ""
                 try:
@@ -77,7 +78,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 except:
                     return Colours('1',"Wrong command: ").get() + msg + ", use: !lastfeed <feedid>"
                 for entry in self.__db.get_news_from_feed(feedid)[::-1]:
-                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,str(entry[3])).get() + "\n"
+                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours(self.url,str(entry[2])).get() + ", " + Colours(self.date,str(entry[3])).get() + "\n"
 
             # Else tell the user how to use the bot
             else:
@@ -131,7 +132,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
         try:
-            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + Colours('',url).get() + ", " + Colours(self.date,str(date)).get()
+            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + Colours(self.url,str(url)).get() + ", " + Colours(self.date,str(date)).get()
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
             print e
