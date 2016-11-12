@@ -22,6 +22,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.__db = db
         self.__on_connect_cb = on_connect_cb
         self.__servers = [irc.bot.ServerSpec(self.__config.HOST, self.__config.PORT, self.__config.PASSWORD)]
+        self.__first_start = False
         self.num_col = self.__config.num_col
         self.date = self.__config.date
         self.feedname = self.__config.feedname
@@ -41,8 +42,16 @@ class IRCBot(irc.bot.SingleServerIRCBot):
 
     def on_join(self, connection, event):
         """Say hello to other people in the channel. """
-        connection.privmsg(self.__config.CHANNEL, "Hi, I'm " + Colours('3',str(connection.get_nickname())).get() + " your bot. Send " + Colours(self.num_col,"!help").get() +" to get a list of commands.")
-        self.__on_connect_cb()
+        welcome_msg = "Hi, I'm " + Colours('3',str(connection.get_nickname())).get() + " your bot. Send " + Colours(self.num_col,"!help").get() +" to get a list of commands."
+
+        if not self.__first_start:
+            connection.privmsg(self.__config.CHANNEL, welcome_msg)
+            self.__on_connect_cb()
+            self.__first_start = True
+
+        if event.source.nick != connection.get_nickname():
+            connection.privmsg(event.source.nick, welcome_msg)
+
 
     def __handle_msg(self, msg):
         """Handles a cmd private message."""
