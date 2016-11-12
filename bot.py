@@ -66,7 +66,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             # Print last 25 news.
             elif msg == "!last":
                 answer = ""
-                for entry in self.__db.get_latest_news()[::-1]:
+                for entry in self.__db.get_latest_news(self.__config.feedlimit)[::-1]:
                     answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,entry[3]).get() + "\n"
 
             # Print last 25 news for a specific feed
@@ -76,7 +76,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                     feedid = int(msg.replace("!lastfeed","").strip())
                 except:
                     return Colours('1',"Wrong command: ").get() + msg + ", use: !lastfeed <feedid>"
-                for entry in self.__db.get_news_from_feed(feedid)[::-1]:
+                for entry in self.__db.get_news_from_feed(feedid, self.__config.feedlimit)[::-1]:
                     answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,str(entry[3])).get() + "\n"
 
             # Else tell the user how to use the bot
@@ -150,8 +150,8 @@ Help:
 
 class Bot(object):
     def __init__(self):
-        self.__db = FeedDB()
         self.__config = Config()
+        self.__db = FeedDB(self.__config)
         self.__irc = IRCBot(self.__config, self.__db, self.on_started)
         self.__threads = []
         self.__connected = False
@@ -211,7 +211,6 @@ class Bot(object):
                     is_new = self.__db.insert_news(feed_info[0], newstitle, newsitem.link, newsdate)
                     if is_new:
                         self.__irc.post_news(feed_info[1], newstitle, newsurl, newsdate)
-
                 print "Updated: " + feed_info[1]
             except Exception as e:
                 print e

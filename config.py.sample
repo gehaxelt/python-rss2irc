@@ -20,3 +20,4 @@ class Config(object):
         self.feedname = '2'
         self.shorturls = False
         self.dateformat = '%Y-%m-%d %H:%M:%S %z'
+        self.feedlimit = 10
