@@ -11,9 +11,9 @@ This is a simple bot which fetches RSS feeds and posts them to an IRC channel.
 
 # Features
 
-- Saves feeds and newsitems in a sqlite database
-- Fetches every feed in a seperate thread
-- Posts new newsitems to an IRC channel
+- Saves feeds and news items in a sqlite database
+- Fetches every feed in a separate thread
+- Posts new news items to an IRC channel
 - Sends information via private messages
 
 # Bot's commands:
