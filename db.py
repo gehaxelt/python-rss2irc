@@ -5,9 +5,10 @@ from sqlite3worker import Sqlite3Worker
 import os
 
 class FeedDB(object):
-    def __init__(self):
+    def __init__(self, config):
         self.__db_path = "./feeds.db"
         self.__db_worker = None
+        self.__config = config
         self.__initiate_db()
 
     def __initiate_db(self):
