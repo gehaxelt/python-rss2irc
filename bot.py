@@ -15,6 +15,7 @@ import dateutil.parser
 from colour import Colours
 from db import FeedDB
 from config import Config
+from feedupdater import FeedUpdater
 
 class IRCBot(irc.bot.SingleServerIRCBot):
     def __init__(self, config, db, on_connect_cb):
@@ -161,69 +162,27 @@ class Bot(object):
     def __init__(self):
         self.__config = Config()
         self.__db = FeedDB(self.__config)
+        self.__feedupdater = FeedUpdater(self.__config, self.__db)
         self.__irc = IRCBot(self.__config, self.__db, self.on_started)
-        self.__threads = []
         self.__connected = False
 
     def start(self):
         """Starts the IRC bot"""
         threading.Thread(target=self.__irc.start).start()
 
+    def initial_feed_update(self):
+        def print_feed_update(feed_title, news_title, news_url, news_date):
+            print("[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
+
+        if self.__config.update_before_connecting:
+            print "Started pre-connection updates!"
+            self.__feedupdater.update_feeds(print_feed_update, False)
+            print "DONE!"
+
     def on_started(self):
         """Gets executed after the IRC thread has successfully established a connection."""
         if not self.__connected:
             print "Connected!"
-
-            # Start one fetcher thread per feed
-            for feed in self.__db.get_feeds():
-                t = threading.Thread(target=self.__fetch_feed, args=(feed,))
-                t.start()
-                self.__threads.append(t)
-            print "Started fetcher threads!"
+            self.__feedupdater.update_feeds(self.__irc.post_news, True)
+            print "Started feed updates!"
             self.__connected = True
-
-    def __fetch_feed(self, feed_info):
-        """Fetches a RSS feed, parses it and updates the database and/or announces new news."""
-        while 1:
-            try:
-                # Parse a feed's url
-                news = feedparser.parse( feed_info[2] )
-
-                # Reverse the ordering. Oldest first.
-                for newsitem in news.entries[::-1]:
-                    newstitle = newsitem.title
-                    if self.__config.shorturls:
-                        newsurl = tinyurl.create_one(newsitem.link) # Create a short link
-                        if newsurl == "Error": #If that fails, use the long version
-                            newsurl = newsitem.link
-                    else:
-                        newsurl = newsitem.link
-
-                    # Try to get the published or updated date. Otherwise set it to 'no date'
-                    try:
-                        # Get date and parse it
-                        newsdate = dateutil.parser.parse(newsitem.published)
-                        # Format date based on 'dateformat' in config.py
-                        newsdate = newsdate.strftime(self.__config.dateformat)
-
-                    except Exception as e:
-                        try:
-                            # Get date and parse it
-                            newsdate = dateutil.parser.parse(newsitem.updated)
-                            # Format date based on 'dateformat' in config.py
-                            newsdate = newsdate.strftime(self.__config.dateformat)
-
-                        except Exception as e:
-                            newsdate = "no date"
-
-                    # Update the database. If it's a new issue, post it to the channel
-                    is_new = self.__db.insert_news(feed_info[0], newstitle, newsitem.link, newsdate)
-                    if is_new:
-                        self.__irc.post_news(feed_info[1], newstitle, newsurl, newsdate)
-                print "Updated: " + feed_info[1]
-            except Exception as e:
-                print e
-                print "Failed: " + feed_info[1]
-
-            # sleep frequency minutes
-            time.sleep(int(feed_info[3])*60)

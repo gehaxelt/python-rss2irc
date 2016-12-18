@@ -58,7 +58,13 @@ cp config.py.sample config.py
 cp feeds.sql.sample feeds.sql
 ```
 
-Edit `configs.py` to fit your needs and IRC settings. All feeds from `feeds.sql` will be imported one the first start.
+Edit `config.py` to fit your needs and IRC settings. All feeds from `feeds.sql` will be imported on the first start.
+
+You might want to update all feeds before connecting to the IRC server to prevent spamming the channel (and optionally a ban from your IRC server). Either set `update_before_connecting = True` in the `config.py` or run the update script before starting the bot:
+
+```
+python2 feedupdater.py
+```
 
 To start the bot, run:
 
