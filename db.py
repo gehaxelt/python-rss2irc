@@ -37,7 +37,7 @@ class FeedDB(object):
     def get_news_from_feed(self, feed_id, limit=10):
         """Returns 'limit' news from a specific feed"""
         news = []
-        for item in self.__db_worker.execute("select id, title, url, published from news where feedid = :feedid limit :limit", {'feedid': feed_id, 'limit':limit}):
+        for item in self.__db_worker.execute("select id, title, url, published from news where feedid = :feedid order by id desc limit :limit", {'feedid': feed_id, 'limit':limit}):
             news.append(item)
         return news
 

@@ -19,7 +19,9 @@ class Config(object):
         self.num_col = '1'
         self.date = '8'
         self.feedname = '2'
+        self.url = '4'
         self.shorturls = False
         self.dateformat = '%Y-%m-%d %H:%M:%S %z'
         self.feedlimit = 10
+        self.feedorderdesc = True
         self.update_before_connecting = True #Update all feeds before connecting to the IRC server
