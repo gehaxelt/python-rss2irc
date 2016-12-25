@@ -11,6 +11,13 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
     bot = Bot()
+
+    missing_config_keys = bot.get_missing_options()
+    if not len(missing_config_keys) == 0:
+        for key in missing_config_keys:
+            print "Key is missing: {}".format(key)
+        os._exit(1)
+
     bot._Bot__irc.connection.buffer_class.errors = 'replace' # prevent utf-8 error in jaraco.stream
     bot.initial_feed_update()
     bot.start()

@@ -15,6 +15,7 @@ class Config(object):
         #4 - blue		5 - purple  6 - cyan
         #7 - lightgreen 8 - grey	9 - pink
         #10 - lighblue
+        self.use_colors = True
         self.num_col = '1'
         self.date = '8'
         self.feedname = '2'

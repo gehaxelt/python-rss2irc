@@ -24,9 +24,9 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.__on_connect_cb = on_connect_cb
         self.__servers = [irc.bot.ServerSpec(self.__config.HOST, self.__config.PORT, self.__config.PASSWORD)]
         self.__first_start = False
-        self.num_col = self.__config.num_col
-        self.date = self.__config.date
-        self.feedname = self.__config.feedname
+        self.color_num = self.__config.num_col
+        self.color_date = self.__config.date
+        self.color_feedname = self.__config.feedname
         self.shorturls = self.__config.shorturls
         self.dateformat = self.__config.dateformat
 
@@ -43,7 +43,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
 
     def on_join(self, connection, event):
         """Say hello to other people in the channel. """
-        welcome_msg = "Hi, I'm " + Colours('3',str(connection.get_nickname())).get() + " your bot. Send " + Colours(self.num_col,"!help").get() +" to get a list of commands."
+        welcome_msg = "Hi, I'm " + self.__get_colored_text('3',str(connection.get_nickname())) + " your bot. Send " + self.__get_colored_text(self.color_num,"!help") +" to get a list of commands."
 
         if not self.__first_start:
             connection.privmsg(self.__config.CHANNEL, welcome_msg)
@@ -65,19 +65,19 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             elif msg == "!list":
                 answer = ""
                 for entry in self.__db.get_feeds():
-                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + Colours(self.date,", updated every ").get() + Colours(self.num_col,str(entry[3])).get() + Colours(self.date," min").get() + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text('',str(entry[2])) + self.__get_colored_text(self.color_date,", updated every ") + self.__get_colored_text(self.color_num,str(entry[3])) + self.__get_colored_text(self.color_date," min") + "\n"
 
             # Print some simple stats (Feed / News count)
             elif msg == "!stats":
                 feeds_count = self.__db.get_feeds_count()
                 news_count = self.__db.get_news_count()
-                answer = "Feeds: " + Colours(self.num_col,str(feeds_count)).get() + ", News: " + Colours(self.num_col,str(news_count)).get()
+                answer = "Feeds: " + self.__get_colored_text(self.color_num,str(feeds_count)) + ", News: " + self.__get_colored_text(self.color_num,str(news_count))
 
             # Print last 25 news.
             elif msg == "!last":
                 answer = ""
                 for entry in self.__db.get_latest_news(self.__config.feedlimit)[::-1]:
-                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,entry[3]).get() + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text('',str(entry[2])) + ", " + self.__get_colored_text(self.color_date,entry[3]) + "\n"
 
             # Print last 25 news for a specific feed
             elif msg.startswith("!lastfeed"):
@@ -85,9 +85,9 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 try:
                     feedid = int(msg.replace("!lastfeed","").strip())
                 except:
-                    return Colours('1',"Wrong command: ").get() + msg + ", use: !lastfeed <feedid>"
+                    return self.__get_colored_text('1',"Wrong command: ") + msg + ", use: !lastfeed <feedid>"
                 for entry in self.__db.get_news_from_feed(feedid, self.__config.feedlimit)[::-1]:
-                    answer += "#" + Colours(self.num_col,str(entry[0])).get() + ": " + entry[1] + ", " + Colours('',str(entry[2])).get() + ", " + Colours(self.date,str(entry[3])).get() + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text('',str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Else tell the user how to use the bot
             else:
@@ -141,10 +141,16 @@ class IRCBot(irc.bot.SingleServerIRCBot):
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
         try:
-            msg = Colours(self.feedname,str(feed_name)).get() + ": " + title + ", " + Colours('',url).get() + ", " + Colours(self.date,str(date)).get()
+            msg = self.__get_colored_text(self.color_feedname,str(feed_name)) + ": " + title + ", " + self.__get_colored_text('',url) + ", " + self.__get_colored_text(self.color_date,str(date))
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
             print e
+
+    def __get_colored_text(self, color, text):
+        if not self.__config.use_colors:
+            return text
+
+        return Colours(color, text).get()
 
     def __help_msg(self):
         """Returns the help/usage message"""
@@ -161,10 +167,25 @@ Help:
 class Bot(object):
     def __init__(self):
         self.__config = Config()
+        self.__missing_options = self.__check_config()
+        if len(self.__missing_options) > 0:
+            return None
         self.__db = FeedDB(self.__config)
         self.__feedupdater = FeedUpdater(self.__config, self.__db)
         self.__irc = IRCBot(self.__config, self.__db, self.on_started)
         self.__connected = False
+
+    def __check_config(self):
+        necessary_options = ["HOST", "PORT", "PASSWORD", "SSL", "CHANNEL", "NICK", "admin_nicks", "use_colors", 
+                             "num_col", "date", "feedname", "shorturls", "dateformat", "feedlimit", "update_before_connecting"]
+        missing_options = []
+        for key in necessary_options:
+            if not hasattr(self.__config, key):
+                missing_options.append(key)
+        return missing_options
+
+    def get_missing_options(self):
+        return self.__missing_options
 
     def start(self):
         """Starts the IRC bot"""
