@@ -27,6 +27,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.color_num = self.__config.num_col
         self.color_date = self.__config.date
         self.color_feedname = self.__config.feedname
+        self.color_url = self.__config.url
         self.shorturls = self.__config.shorturls
         self.dateformat = self.__config.dateformat
 
@@ -65,7 +66,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             elif msg == "!list":
                 answer = ""
                 for entry in self.__db.get_feeds():
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text('',str(entry[2])) + self.__get_colored_text(self.color_date,", updated every ") + self.__get_colored_text(self.color_num,str(entry[3])) + self.__get_colored_text(self.color_date," min") + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + self.__get_colored_text(self.color_date,", updated every ") + self.__get_colored_text(self.color_num,str(entry[3])) + self.__get_colored_text(self.color_date," min") + "\n"
 
             # Print some simple stats (Feed / News count)
             elif msg == "!stats":
@@ -73,21 +74,28 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 news_count = self.__db.get_news_count()
                 answer = "Feeds: " + self.__get_colored_text(self.color_num,str(feeds_count)) + ", News: " + self.__get_colored_text(self.color_num,str(news_count))
 
-            # Print last 25 news.
+            # Print last config.feedlimit news.
             elif msg == "!last":
                 answer = ""
-                for entry in self.__db.get_latest_news(self.__config.feedlimit)[::-1]:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text('',str(entry[2])) + ", " + self.__get_colored_text(self.color_date,entry[3]) + "\n"
+                items = self.__db.get_latest_news(self.__config.feedlimit)
+                if not self.__config.feedorderdesc:
+                    items = items[::-1]
 
-            # Print last 25 news for a specific feed
+                for entry in items:
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+
+            # Print last config.feedlimit news for a specific feed
             elif msg.startswith("!lastfeed"):
                 answer = ""
                 try:
                     feedid = int(msg.replace("!lastfeed","").strip())
                 except:
                     return self.__get_colored_text('1',"Wrong command: ") + msg + ", use: !lastfeed <feedid>"
-                for entry in self.__db.get_news_from_feed(feedid, self.__config.feedlimit)[::-1]:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text('',str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                items = self.__db.get_news_from_feed(feedid, self.__config.feedlimit)
+                if not self.__config.feedorderdesc:
+                    items = items[::-1]
+                for entry in items:
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Else tell the user how to use the bot
             else:
@@ -141,7 +149,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
     def post_news(self, feed_name, title, url, date):
         """Posts a new announcement to the channel"""
         try:
-            msg = self.__get_colored_text(self.color_feedname,str(feed_name)) + ": " + title + ", " + self.__get_colored_text('',url) + ", " + self.__get_colored_text(self.color_date,str(date))
+            msg = self.__get_colored_text(self.color_feedname,str(feed_name)) + ": " + title + ", " + self.__get_colored_text(self.color_url,url) + ", " + self.__get_colored_text(self.color_date,str(date))
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
             print e
@@ -177,7 +185,8 @@ class Bot(object):
 
     def __check_config(self):
         necessary_options = ["HOST", "PORT", "PASSWORD", "SSL", "CHANNEL", "NICK", "admin_nicks", "use_colors", 
-                             "num_col", "date", "feedname", "shorturls", "dateformat", "feedlimit", "update_before_connecting"]
+                             "num_col", "date", "feedname", "shorturls", "dateformat", "feedlimit", "update_before_connecting",
+                             "url", "feedorderdesc"]
         missing_options = []
         for key in necessary_options:
             if not hasattr(self.__config, key):
