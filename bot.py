@@ -82,7 +82,10 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                     items = items[::-1]
 
                 for entry in items:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    if self.__config.excerpt_len > 0:
+                        answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + entry[4] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    else:
+                        answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Print last config.feedlimit news for a specific feed
             elif msg.startswith("!lastfeed"):
@@ -95,7 +98,10 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 if not self.__config.feedorderdesc:
                     items = items[::-1]
                 for entry in items:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    if self.__config.excerpt_len > 0:
+                        answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + str(entry[4]) + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    else:
+                        answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Else tell the user how to use the bot
             else:
@@ -201,8 +207,12 @@ class Bot(object):
         threading.Thread(target=self.__irc.start).start()
 
     def initial_feed_update(self):
-        def print_feed_update(feed_title, news_title, news_url, news_date):
-            print("[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
+        def print_feed_update(feed_title, news_title, news_url, news_date, news_excerpt=""):
+            if news_excerpt:
+                output_str = "[+]: {}||{}||{}||{}||{}".format(feed_title, news_title, news_excerpt, news_url, news_date)
+            else:
+                output_str = "[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date)
+            print(output_str)
 
         if self.__config.update_before_connecting:
             print "Started pre-connection updates!"

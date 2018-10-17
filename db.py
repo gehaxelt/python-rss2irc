@@ -18,7 +18,7 @@ class FeedDB(object):
         if not os.path.exists(self.__db_path):
             self.__db_worker = Sqlite3Worker(self.__db_path)
             self.__db_worker.execute('CREATE TABLE feeds (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR(200) UNIQUE, url CHAR(200) UNIQUE, frequency INTEGER(3))')
-            self.__db_worker.execute('CREATE TABLE news (id INTEGER PRIMARY KEY AUTOINCREMENT, title CHAR(255), url CHAR(255), feedid INTEGER, published TEXT, FOREIGN KEY(feedid) REFERENCES feeds(id))')
+            self.__db_worker.execute('CREATE TABLE news (id INTEGER PRIMARY KEY AUTOINCREMENT, title CHAR(255), url CHAR(255), feedid INTEGER, published TEXT, excerpt TEXT, FOREIGN KEY(feedid) REFERENCES feeds(id))')
             if os.path.exists("./feeds.sql"):
                 f = open("./feeds.sql", "r")
                 for insert in f.readlines():
@@ -26,6 +26,10 @@ class FeedDB(object):
                 f.close()
         else:
             self.__db_worker = Sqlite3Worker(self.__db_path)
+            try:
+                self.__db_worker.execute('ALTER TABLE news ADD COLUMN excerpt TEXT;')
+            except Exception as e:
+                print(e)
 
     def get_feeds(self):
         """Returns all feeds"""
@@ -37,14 +41,14 @@ class FeedDB(object):
     def get_news_from_feed(self, feed_id, limit=10):
         """Returns 'limit' news from a specific feed"""
         news = []
-        for item in self.__db_worker.execute("select id, title, url, published from news where feedid = :feedid order by id desc limit :limit", {'feedid': feed_id, 'limit':limit}):
+        for item in self.__db_worker.execute("select id, title, url, published, excerpt from news where feedid = :feedid order by id desc limit :limit", {'feedid': feed_id, 'limit':limit}):
             news.append(item)
         return news
 
     def get_latest_news(self, limit=10):
         """Returns 'limit' latest news"""
         news = []
-        for item in self.__db_worker.execute("select id, title, url, published from news order by id desc limit :limit", {'limit':limit}):
+        for item in self.__db_worker.execute("select id, title, url, published, excerpt from news order by id desc limit :limit", {'limit':limit}):
             news.append(item)
         return news
 
@@ -58,10 +62,10 @@ class FeedDB(object):
         count = self.__db_worker.execute("select count(id) from news")[0][0]
         return count
 
-    def insert_news(self, feed_id, title, url, published):
+    def insert_news(self, feed_id, title, url, published, excerpt):
         """Checks if a news item with the given information exists. If not, create a new entry."""
         exists = self.__db_worker.execute("select exists(select 1 FROM news WHERE feedid = :feedid and url = :url and published = :published LIMIT 1)", {'feedid': feed_id, 'url': url, 'published': published})[0][0]
         if exists:
             return False
-        self.__db_worker.execute("INSERT INTO news (title, url, feedid, published) VALUES (:title, :url, :feedid, :published)", {'title': title, 'url': url, 'feedid': feed_id, 'published': published})
+        self.__db_worker.execute("INSERT INTO news (title, url, feedid, published, excerpt) VALUES (:title, :url, :feedid, :published, :except)", {'title': title, 'url': url, 'feedid': feed_id, 'published': published, 'excerpt':excerpt})
         return True

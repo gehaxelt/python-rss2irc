@@ -73,10 +73,15 @@ class FeedUpdater(object):
                         except Exception as e:
                             newsdate = "no date"
 
+                    if self.__config.excerpt_len > 0:
+                        newsexcerpt = newsitem.summary[:self.__config.excerpt_len]
+                    else:
+                        newsexcerpt = ""
+
                     # Update the database. If it's a new issue, post it to the channel
-                    is_new = self.__db.insert_news(feed_info['id'], newstitle, newsitem.link, newsdate)
+                    is_new = self.__db.insert_news(feed_info['id'], newstitle, newsitem.link, newsdate, newsexcerpt)
                     if is_new and callback is not None:
-                        callback(feed_info['title'], newstitle, newsurl, newsdate)
+                        callback(feed_info['title'], newstitle, newsurl, newsdate, newsexcerpt)
                 print "Updated: " + feed_info['title']
             except Exception as e:
                 print e
@@ -89,8 +94,12 @@ class FeedUpdater(object):
             time.sleep(int(feed_info['published'])*60)
 
 if __name__ == "__main__":
-    def print_line(feed_title, news_title, news_url, news_date):
-        print("[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
+    def print_line(feed_title, news_title, news_url, news_date, news_excerpt):
+        if news_excerpt:
+            output_str = "[+]: {}||{}||{}||{}||{}".format(feed_title, news_title, news_excerpt, news_url, news_date)
+        else:
+            output_str = "[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date)
+        print(output_str)
 
     def main():
         config = Config()
