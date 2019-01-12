@@ -202,7 +202,7 @@ class Bot(object):
 
     def initial_feed_update(self):
         def print_feed_update(feed_title, news_title, news_url, news_date):
-            print("[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
+            print(u"[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
 
         if self.__config.update_before_connecting:
             print "Started pre-connection updates!"
