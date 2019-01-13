@@ -90,7 +90,7 @@ class FeedUpdater(object):
 
 if __name__ == "__main__":
     def print_line(feed_title, news_title, news_url, news_date):
-        print("[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
+        print(u"[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
 
     def main():
         config = Config()
