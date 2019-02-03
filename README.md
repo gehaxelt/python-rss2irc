@@ -72,6 +72,8 @@ To start the bot, run:
 python2 main.py
 ```
 
+If you want to run this as a systemd service, you can use the `rss2irc.service` file after adjusting the paths in there.
+
 # Adding feeds
 To add a new feed, edit the `feeds.sql` and import it to your sqlite database:
 
