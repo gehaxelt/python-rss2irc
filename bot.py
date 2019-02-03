@@ -44,6 +44,9 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             connection.join(self.__config.CHANNEL)
 
     def on_welcome(self, connection, event):
+        """Authenticate using NickServ"""
+        if self.__config.NICKPASS:
+            self.connection.privmsg("NickServ", "IDENTIFY {}".format(self.__config.NICKPASS))
         """Join the correct channel upon connecting"""
         if irc.client.is_channel(self.__config.CHANNEL):
             connection.join(self.__config.CHANNEL)

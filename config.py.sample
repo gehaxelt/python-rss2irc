@@ -9,6 +9,7 @@ class Config(object):
         self.SSL = False
         self.CHANNEL = "##YOURCHANNEL"
         self.NICK = "YOURBOTNICK"
+        self.NICKPASS = "YOURPASSWORD"
         self.admin_nicks= ['YOURADMINNICK']
         #=Colours=
         #1 - red		2 - green	3 - yellow
