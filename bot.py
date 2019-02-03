@@ -37,6 +37,12 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         else:
             super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK)
 
+    def on_kick(self, connection, event):
+        """Join the correct channel again"""
+        if irc.client.is_channel(self.__config.CHANNEL):
+            time.sleep(31)
+            connection.join(self.__config.CHANNEL)
+
     def on_welcome(self, connection, event):
         """Join the correct channel upon connecting"""
         if irc.client.is_channel(self.__config.CHANNEL):
