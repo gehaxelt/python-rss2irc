@@ -1,0 +1,10 @@
+[Unit]
+Description=Rss2Irc Bot
+
+[Service]
+KillMode=process
+User=rss2irc #Change to your username
+ExecStart=/PATH-TO-THE-REPO/venv/bin/python  /PATH-TO-THE-REPO/main.py #Replace PATH-TO-THE-REPO with the absolute path to the repository.
+
+[Install]
+WantedBy=multi-user.target
