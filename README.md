@@ -20,6 +20,7 @@ This is a simple bot which fetches RSS feeds and posts them to an IRC channel.
 - Post delayed during conversation
 - Keywords in news title filtering support
 - Customizable post colors
+- Automatic join to channel on kick
 
 # Bot's commands:
 
