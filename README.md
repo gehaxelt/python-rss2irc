@@ -15,6 +15,11 @@ This is a simple bot which fetches RSS feeds and posts them to an IRC channel.
 - Fetches every feed in a separate thread
 - Posts new news items to an IRC channel
 - Sends information via private messages
+- Full utf-8 support
+- Nick login support
+- Post delayed during conversation
+- Keywords in news title filtering support
+- Customizable post colors
 
 # Bot's commands:
 
