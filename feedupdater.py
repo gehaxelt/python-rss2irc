@@ -99,8 +99,6 @@ if __name__ == "__main__":
         print datetime.datetime.now(), u"Starting offline update."
         sys.stdout.flush()
         updater.update_feeds(print_line, False)
-        print datetime.datetime.now(), u"Finishing offline update."
-        sys.stdout.flush()
 
     def signal_handler(signal, frame):
         print datetime.datetime.now(), u"Received SIGINT signal, finishing bot."
