@@ -268,8 +268,6 @@ class Bot(object):
             print datetime.datetime.now(), u"Starting offline update."
             sys.stdout.flush()
             self.__feedupdater.update_feeds(print_feed_update, False)
-            print datetime.datetime.now(), u"Finishing offline update."
-            sys.stdout.flush()
 
     def on_started(self):
         """Gets executed after the IRC thread has successfully established a connection."""
