@@ -10,11 +10,9 @@ import datetime
 import sys
 import codecs
 import locale
-import time
 
 sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
-Config.lastpubmsg = time.time()
 
 def signal_handler(signal, frame):
     print datetime.datetime.now() , u"Received SIGINT signal, finishing bot."
