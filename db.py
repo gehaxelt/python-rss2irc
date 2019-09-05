@@ -1,8 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 from sqlite3worker import Sqlite3Worker
+from config import Config
 import os
+import sys
+import datetime
+import time
 
 class FeedDB(object):
     def __init__(self, config):
@@ -10,6 +14,7 @@ class FeedDB(object):
         self.__db_worker = None
         self.__config = config
         self.__initiate_db()
+        self.__postdelay = self.__config.postdelay
 
     def __initiate_db(self):
         """Create a DB connection"""
@@ -59,9 +64,14 @@ class FeedDB(object):
         return count
 
     def insert_news(self, feed_id, title, url, published):
-        """Checks if a news item with the given information exists. If not, create a new entry."""
-        exists = self.__db_worker.execute("select exists(select 1 FROM news WHERE feedid = :feedid and url = :url and published = :published LIMIT 1)", {'feedid': feed_id, 'url': url, 'published': published})[0][0]
-        if exists:
+        threshold = Config.lastpubmsg + self.__postdelay
+        now = time.time()
+        if now >= threshold:
+            """Checks if a news item with the given information exists. If not, create a new entry."""
+            exists = self.__db_worker.execute("select exists(select 1 FROM news WHERE feedid = :feedid and url = :url and published = :published LIMIT 1)", {'feedid': feed_id, 'url': url, 'published': published})[0][0]
+            if exists:
+                return False
+            self.__db_worker.execute("INSERT INTO news (title, url, feedid, published) VALUES (:title, :url, :feedid, :published)", {'title': title, 'url': url, 'feedid': feed_id, 'published': published})
+            return True
+        else:
             return False
-        self.__db_worker.execute("INSERT INTO news (title, url, feedid, published) VALUES (:title, :url, :feedid, :published)", {'title': title, 'url': url, 'feedid': feed_id, 'published': published})
-        return True

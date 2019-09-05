@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 import ssl
@@ -9,6 +9,7 @@ import irc.connection
 import tinyurl
 import time
 import re
+import sys
 import feedparser
 import datetime
 import dateutil.parser
@@ -16,6 +17,7 @@ from colour import Colours
 from db import FeedDB
 from config import Config
 from feedupdater import FeedUpdater
+
 
 class IRCBot(irc.bot.SingleServerIRCBot):
     def __init__(self, config, db, on_connect_cb):
@@ -25,44 +27,59 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self.__servers = [irc.bot.ServerSpec(self.__config.HOST, self.__config.PORT, self.__config.PASSWORD)]
         self.__first_start = False
         self.color_num = self.__config.num_col
-        self.color_date = self.__config.date
         self.color_feedname = self.__config.feedname
+        self.color_newstitle = self.__config.newstitle
         self.color_url = self.__config.url
+        self.color_date = self.__config.date
         self.shorturls = self.__config.shorturls
         self.dateformat = self.__config.dateformat
+        self.filterkeywords = self.__config.filterkeywords
 
         if self.__config.SSL:
             ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
+            print datetime.datetime.now(), u"Starting SSL connection."
+            sys.stdout.flush()
             super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK, connect_factory=ssl_factory)
+
         else:
+            print datetime.datetime.now(), u"Starting connection."
+            sys.stdout.flush()
             super(IRCBot, self).__init__(self.__servers, self.__config.NICK, self.__config.NICK)
 
-    def on_kick(self, connection, event):
-        """Join the correct channel again"""
-        if irc.client.is_channel(self.__config.CHANNEL):
-            time.sleep(31)
-            connection.join(self.__config.CHANNEL)
-
     def on_welcome(self, connection, event):
-        """Authenticate using NickServ"""
+        """Login"""
         if self.__config.NICKPASS:
-            self.connection.privmsg("NickServ", "IDENTIFY {}".format(self.__config.NICKPASS))
+            print datetime.datetime.now(), u"Starting authentication."
+            sys.stdout.flush()
+            self.send_msg("NickServ", "IDENTIFY {}".format(self.__config.NICKPASS))
+
         """Join the correct channel upon connecting"""
         if irc.client.is_channel(self.__config.CHANNEL):
+            print datetime.datetime.now(), u"Joining to channel."
+            sys.stdout.flush()
             connection.join(self.__config.CHANNEL)
 
     def on_join(self, connection, event):
         """Say hello to other people in the channel. """
-        welcome_msg = "Hi, I'm " + self.__get_colored_text('3',str(connection.get_nickname())) + " your bot. Send " + self.__get_colored_text(self.color_num,"!help") +" to get a list of commands."
-
         if not self.__first_start:
-            connection.privmsg(self.__config.CHANNEL, welcome_msg)
+            self.send_msg(self.__config.CHANNEL, self.welcome_msg())
             self.__on_connect_cb()
             self.__first_start = True
 
-        if event.source.nick != connection.get_nickname():
-            connection.privmsg(event.source.nick, welcome_msg)
+    def welcome_msg(self):
+        msg = u"Hi, I'm the channel's " + self.get_bolded_text(self.__get_colored_text(self.color_feedname,"RSS")) + u" news publishing bot v2.0. Send " + self.__get_colored_text(self.color_num,"!help") + u" to receive a list of commands in private message (PM). If you find me annoying, you can to use " + self.__get_colored_text(self.color_num,"/IGNORE " + self.connection.get_nickname()) + u" to stop reading me."
+        time.sleep(1)
+        return msg
 
+    def on_kick(self, connection, event):
+        """Join the correct channel again"""
+        banned_nick = event.arguments[0].lower().strip()
+        botnick = self.connection.get_nickname().lower()
+        if irc.client.is_channel(self.__config.CHANNEL) and banned_nick == botnick:
+            time.sleep(31)
+            print datetime.datetime.now(), u"Joining to channel again."
+            sys.stdout.flush()
+            connection.join(self.__config.CHANNEL)
 
     def __handle_msg(self, msg):
         """Handles a cmd private message."""
@@ -75,13 +92,13 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             elif msg == "!list":
                 answer = ""
                 for entry in self.__db.get_feeds():
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + self.__get_colored_text(self.color_date,", updated every ") + self.__get_colored_text(self.color_num,str(entry[3])) + self.__get_colored_text(self.color_date," min") + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0]) + " - ") + self.get_bolded_text(self.__get_colored_text(self.color_feedname,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ",") + u" updated every " + self.__get_colored_text(self.color_num,str(entry[3])) + u" minutes." + "\n"
 
             # Print some simple stats (Feed / News count)
             elif msg == "!stats":
                 feeds_count = self.__db.get_feeds_count()
                 news_count = self.__db.get_news_count()
-                answer = "Feeds: " + self.__get_colored_text(self.color_num,str(feeds_count)) + ", News: " + self.__get_colored_text(self.color_num,str(news_count))
+                answer = u"Feeds: " + self.get_bolded_text(self.__get_colored_text(self.color_num,str(feeds_count))) + u", News: " + self.get_bolded_text(self.__get_colored_text(self.color_num,str(news_count)))
 
             # Print last config.feedlimit news.
             elif msg == "!last":
@@ -91,7 +108,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                     items = items[::-1]
 
                 for entry in items:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0]) + " - ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ", ") + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Print last config.feedlimit news for a specific feed
             elif msg.startswith("!lastfeed"):
@@ -99,20 +116,20 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 try:
                     feedid = int(msg.replace("!lastfeed","").strip())
                 except:
-                    return self.__get_colored_text('1',"Wrong command: ") + msg + ", use: !lastfeed <feedid>"
+                    return self.__get_colored_text('1',u"Wrong command. ") + msg + u". Send !lastfeed <feedid>"
                 items = self.__db.get_news_from_feed(feedid, self.__config.feedlimit)
                 if not self.__config.feedorderdesc:
                     items = items[::-1]
                 for entry in items:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0])) + ": " + entry[1] + ", " + self.__get_colored_text(self.color_url,str(entry[2])) + ", " + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0]) + " - ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ", ") + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Else tell the user how to use the bot
             else:
-                answer = "Use !help for possible commands."
+                answer = u"Send !help to see the available commands."
         except Exception as e:
-            print e
-            answer = "Something went wrong :("
-
+            print datetime.datetime.now(), e
+            sys.stdout.flush()
+            answer = u"Something was wrong."
         return answer
 
     def on_privmsg(self, connection, event):
@@ -122,22 +139,26 @@ class IRCBot(irc.bot.SingleServerIRCBot):
 
         # Get the message and return an answer
         msg = event.arguments[0].lower().strip()
-        print msg
-
+        print datetime.datetime.now(), msg, "command from", event.source.nick
+        sys.stdout.flush()
         answer = self.__handle_msg(msg)
         self.send_msg(event.source.nick, answer)
+        time.sleep(5)
 
     def on_pubmsg(self, connection, event):
+        Config.lastpubmsg = time.time()
         """Handles the bot's public (channel) messages"""
         if len(event.arguments) < 1:
             return
-
-        # Get the message. We are only interested in "!help"
+        # Get the message. We are only interested in "!help" or botnick
         msg = event.arguments[0].lower().strip()
-
+        botnick = self.connection.get_nickname()
         # Send the answer as a private message
         if msg == "!help":
             self.send_msg(event.source.nick, self.__help_msg())
+        # Send the answer as a public message
+        if botnick.lower() in msg:
+            self.send_msg(self.__config.CHANNEL, self.welcome_msg())
 
     def on_nicknameinuse(self, connection, event):
         """Changes the nickname if necessary"""
@@ -153,15 +174,35 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                     self.connection.privmsg(target, sub_line)
                     time.sleep(1) # Don't flood the target
         except Exception as e:
-            print e
+            print datetime.datetime.now(), e
+            sys.stdout.flush()
 
     def post_news(self, feed_name, title, url, date):
+        """Cancel post if filter keyword is in title"""
+        for keyword in self.filterkeywords:
+            if keyword in title.lower():
+                print datetime.datetime.now(), u"Found", keyword, "keyword in title. Aborting post."
+                sys.stdout.flush()
+                return
+        """Try shortening url"""
+        if self.__config.shorturls:
+            try:
+                post_url = tinyurl.create_one(url)
+                if ("error" in post_url.lower()):
+                    post_url = url
+            except Exception as e:
+                post_url = url
+                print datetime.datetime.now(), e
+                sys.stdout.flush()
+        else:
+            post_url = url
         """Posts a new announcement to the channel"""
         try:
-            msg = self.__get_colored_text(self.color_feedname,str(feed_name)) + ": " + title + ", " + self.__get_colored_text(self.color_url,url) + ", " + self.__get_colored_text(self.color_date,str(date))
+            msg = self.__get_colored_text(self.color_feedname,feed_name + ": ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,title)) + " > " + self.__get_colored_text(self.color_url,post_url + ", ") + self.__get_colored_text(self.color_date,str(date))
             self.send_msg(self.__config.CHANNEL, msg)
         except Exception as e:
-            print e
+            print datetime.datetime.now(), e
+            sys.stdout.flush()
 
     def __get_colored_text(self, color, text):
         if not self.__config.use_colors:
@@ -169,17 +210,24 @@ class IRCBot(irc.bot.SingleServerIRCBot):
 
         return Colours(color, text).get()
 
+    def get_bolded_text(self, string):
+        """Returns the string bolded."""
+        return "\002" + string + "\002"
+
     def __help_msg(self):
         """Returns the help/usage message"""
-        return """\
+        return u"""\
 Help:
-    Send all commands as a private message to """ + self.connection.get_nickname() + """
-    - !help         Prints this help
-    - !list         Prints all feeds
-    - !stats        Prints some statistics
-    - !last         Prints the last 10 entries
-    - !lastfeed <feedid> Prints the last 10 entries from a specific feed
+    - /IGNORE """ + self.connection.get_nickname() + u""" - Lets you stop reading the bot.
+
+  You can send these commands in private message (PM) to """ + self.connection.get_nickname() + u""":
+    - !help - Show this help message.
+    - !stats - Show some statistics.
+    - !list - Show all feeds.
+    - !last - Show last news published in all feeds.
+    - !lastfeed <feedid> - Show last news published in a specific feed.
 """
+
 
 class Bot(object):
     def __init__(self):
@@ -193,9 +241,9 @@ class Bot(object):
         self.__connected = False
 
     def __check_config(self):
-        necessary_options = ["HOST", "PORT", "PASSWORD", "SSL", "CHANNEL", "NICK", "admin_nicks", "use_colors", 
-                             "num_col", "date", "feedname", "shorturls", "dateformat", "feedlimit", "update_before_connecting",
-                             "url", "feedorderdesc"]
+        necessary_options = ["HOST", "PORT", "PASSWORD", "SSL", "CHANNEL", "NICK", "admin_nicks", "use_colors",
+        "num_col", "date", "feedname", "shorturls", "dateformat", "feedlimit", "update_before_connecting",
+        "url", "feedorderdesc"]
         missing_options = []
         for key in necessary_options:
             if not hasattr(self.__config, key):
@@ -207,21 +255,24 @@ class Bot(object):
 
     def start(self):
         """Starts the IRC bot"""
+        print datetime.datetime.now(), u"Starting bot."
+        sys.stdout.flush()
         threading.Thread(target=self.__irc.start).start()
 
     def initial_feed_update(self):
         def print_feed_update(feed_title, news_title, news_url, news_date):
-            print(u"[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
+            print datetime.datetime.now(), u"[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date)
+            sys.stdout.flush()
 
         if self.__config.update_before_connecting:
-            print "Started pre-connection updates!"
+            print datetime.datetime.now(), u"Starting offline update."
+            sys.stdout.flush()
             self.__feedupdater.update_feeds(print_feed_update, False)
-            print "DONE!"
 
     def on_started(self):
         """Gets executed after the IRC thread has successfully established a connection."""
         if not self.__connected:
-            print "Connected!"
+            print datetime.datetime.now(), u"Starting feeds periodic update..."
+            sys.stdout.flush()
             self.__feedupdater.update_feeds(self.__irc.post_news, True)
-            print "Started feed updates!"
             self.__connected = True
