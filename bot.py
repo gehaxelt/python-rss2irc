@@ -241,9 +241,9 @@ class Bot(object):
         self.__connected = False
 
     def __check_config(self):
-        necessary_options = ["HOST", "PORT", "PASSWORD", "SSL", "CHANNEL", "NICK", "admin_nicks", "use_colors",
-        "num_col", "date", "feedname", "shorturls", "dateformat", "feedlimit", "update_before_connecting",
-        "url", "feedorderdesc"]
+        necessary_options = ["HOST", "PORT", "PASSWORD", "SSL", "CHANNEL",
+        "use_colors", "num_col", "feedname", "newstitle", "url", "date", "shorturls", "dateformat", "feedlimit",
+        "postdelay", "feedorderdesc", "update_before_connecting", "filterkeywords"]
         missing_options = []
         for key in necessary_options:
             if not hasattr(self.__config, key):
