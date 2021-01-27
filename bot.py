@@ -6,13 +6,13 @@ import threading
 import irc.bot
 import irc.client
 import irc.connection
-import tinyurl
 import time
 import re
 import sys
 import feedparser
 import datetime
 import dateutil.parser
+import requests
 from colour import Colours
 from db import FeedDB
 from config import Config
@@ -187,7 +187,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         """Try shortening url"""
         if self.__config.shorturls:
             try:
-                post_url = tinyurl.create_one(url)
+                post_url = self.shorten(url)
                 if ("error" in post_url.lower()):
                     post_url = url
             except Exception as e:
@@ -203,6 +203,15 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         except Exception as e:
             print datetime.datetime.now(), e
             sys.stdout.flush()
+
+    def shorten(self, url):
+        try: # Trying to shorten URL
+            sresponse = requests.get('https://v.gd/create.php?format=json&url=' + url)
+            surl = sresponse.json()['shorturl']
+        except Exception as err:
+            print('A shortening error occurred.')
+            surl = url
+        return surl
 
     def __get_colored_text(self, color, text):
         if not self.__config.use_colors:
