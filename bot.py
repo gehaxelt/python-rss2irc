@@ -67,7 +67,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             self.__first_start = True
 
     def welcome_msg(self):
-        msg = u"Hi, I'm the channel's " + self.get_bolded_text(self.__get_colored_text(self.color_feedname,"RSS")) + u" news publishing bot v2.0. Send " + self.__get_colored_text(self.color_num,"!help") + u" to receive a list of commands in private message (PM). If you find me annoying, you can to use " + self.__get_colored_text(self.color_num,"/IGNORE " + self.connection.get_nickname()) + u" to stop reading me."
+        msg = u"Hi, I'm the channel " + self.get_bolded_text(self.__get_colored_text(self.color_feedname,"RSS")) + u" news publishing bot v2.1. Send " + self.__get_colored_text(self.color_num,"!help") + u" to receive a command list in private message (PM). If you find me annoying, you can to use " + self.__get_colored_text(self.color_num,"/IGNORE " + self.connection.get_nickname()) + u" to stop reading me."
         time.sleep(1)
         return msg
 
