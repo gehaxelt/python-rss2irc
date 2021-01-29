@@ -78,7 +78,7 @@ python2 main.py
 ```
     or
 ```
-./main.py 2>&1 > newsbot.log &
+python2 main.py 2>&1 > newsbot.log &
 ```
 
 If you want to run this as a systemd service, you can use the `rss2irc.service` file after adjusting the paths in there.
