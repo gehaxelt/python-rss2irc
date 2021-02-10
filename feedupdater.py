@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 import feedparser
 import datetime
@@ -68,15 +67,15 @@ class FeedUpdater(object):
                             newsdate = newsdate.strftime(self.__config.dateformat)
 
                         except Exception as e:
-                            newsdate = u"No date"
+                            newsdate = "No date"
 
                     # Update the database. If it's a new issue, post it to the channel
                     is_new = self.__db.insert_news(feed_info['id'], newstitle, newsitem.link, newsdate)
                     if is_new and callback is not None:
                         callback(feed_info['title'], newstitle, newsurl, newsdate)
             except Exception as e:
-                print datetime.datetime.now(), e
-                print datetime.datetime.now(), u"Feed not updated: " + feed_info['title']
+                print(datetime.datetime.now(), e)
+                print(datetime.datetime.now(), "Feed not updated: " + feed_info['title'])
                 sys.stdout.flush()
 
 
@@ -88,7 +87,7 @@ class FeedUpdater(object):
 
 if __name__ == "__main__":
     def print_line(feed_title, news_title, news_url, news_date):
-        print datetime.datetime.now(), u"[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date)
+        print(datetime.datetime.now(), "[+]: {}||{}||{}||{}".format(feed_title, news_title, news_url, news_date))
         sys.stdout.flush()
 
     def main():
@@ -96,12 +95,12 @@ if __name__ == "__main__":
         db = FeedDB(config)
         updater = FeedUpdater(config, db)
 
-        print datetime.datetime.now(), u"Starting offline update."
+        print(datetime.datetime.now(), "Starting offline update.")
         sys.stdout.flush()
         updater.update_feeds(print_line, False)
 
     def signal_handler(signal, frame):
-        print datetime.datetime.now(), u"Received SIGINT signal, finishing bot."
+        print(datetime.datetime.now(), "Received SIGINT signal, finishing bot.")
         sys.stdout.flush()
         os._exit(0)
 
