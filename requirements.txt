@@ -1,5 +1,5 @@
-git+https://github.com/palantir/sqlite3worker#egg=sqlite3worker
-feedparser==5.2.1
-requests==2.25.1
-irc==14.2
+feedparser==6.0.2
+irc==19.0.1
 python_dateutil==2.8.1
+requests==2.25.1
+sqlite3worker==1.1.7
