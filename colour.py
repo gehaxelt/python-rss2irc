@@ -1,6 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-
 class Colours:
 	def __init__(self, col, string):
 		self.colour = col
