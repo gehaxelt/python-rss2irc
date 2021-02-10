@@ -1,6 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-
 from sqlite3worker import Sqlite3Worker
 from config import Config
 import os
