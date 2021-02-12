@@ -89,7 +89,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             elif msg == "!list":
                 answer = ""
                 for entry in self.__db.get_feeds():
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0]) + " - ") + self.get_bolded_text(self.__get_colored_text(self.color_feedname,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ",") + " updated every " + self.__get_colored_text(self.color_num,str(entry[3])) + " minutes." + "\n"
+                    answer += "# " + self.__get_colored_text(self.color_num,str(entry[0]) + "- ") + self.get_bolded_text(self.__get_colored_text(self.color_feedname,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ",") + " updated every " + self.__get_colored_text(self.color_num,str(entry[3])) + " minutes." + "\n"
 
             # Print some simple stats (Feed / News count)
             elif msg == "!stats":
@@ -105,7 +105,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                     items = items[::-1]
 
                 for entry in items:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0]) + " - ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ", ") + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    answer += "# " + self.__get_colored_text(self.color_num,str(entry[0]) + "- ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ", ") + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Print last config.feedlimit news for a specific feed
             elif msg.startswith("!lastfeed"):
@@ -118,7 +118,7 @@ class IRCBot(irc.bot.SingleServerIRCBot):
                 if not self.__config.feedorderdesc:
                     items = items[::-1]
                 for entry in items:
-                    answer += "#" + self.__get_colored_text(self.color_num,str(entry[0]) + " - ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ", ") + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
+                    answer += "# " + self.__get_colored_text(self.color_num,str(entry[0]) + "- ") + self.get_bolded_text(self.__get_colored_text(self.color_newstitle,entry[1] + " > ")) + self.__get_colored_text(self.color_url,entry[2] + ", ") + self.__get_colored_text(self.color_date,str(entry[3])) + "\n"
 
             # Else tell the user how to use the bot
             else:
@@ -168,8 +168,8 @@ class IRCBot(irc.bot.SingleServerIRCBot):
             for line in msg.split("\n"):
                 # Split lines that are longer than 510 characters into multiple messages.
                 for sub_line in re.findall('.{1,510}', line):
+                    time.sleep(2) # Don't flood the target
                     self.connection.privmsg(target, sub_line)
-                    time.sleep(1) # Don't flood the target
         except Exception as e:
             print(datetime.datetime.now(), e)
             sys.stdout.flush()
