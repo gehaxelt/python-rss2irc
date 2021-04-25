@@ -8,7 +8,6 @@ import re
 import sys
 import feedparser
 import datetime
-import dateutil.parser
 import requests
 from colour import Colours
 from db import FeedDB
