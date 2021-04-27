@@ -50,19 +50,18 @@ class FeedUpdater(object):
                 for newsitem in news.entries[::-1]:
                     newstitle = newsitem.title
                     newsurl = newsitem.link
-#                    print datetime.datetime.now(), newsurl
 
                     # Try to get the published or updated date. Otherwise set it to 'no date'
                     try:
                         # Get date and parse it
-                        newsdate = dateutil.parser.parse(newsitem.published, tzinfos=TZOFFSETS)
+                        newsdate = dateutil.parser.parse(newsitem.published)
                         # Format date based on 'dateformat' in config.py
                         newsdate = newsdate.strftime(self.__config.dateformat)
 
                     except Exception as e:
                         try:
                             # Get date and parse it
-                            newsdate = dateutil.parser.parse(newsitem.updated, tzinfos=TZOFFSETS)
+                            newsdate = dateutil.parser.parse(newsitem.updated)
                             # Format date based on 'dateformat' in config.py
                             newsdate = newsdate.strftime(self.__config.dateformat)
 
