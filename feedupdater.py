@@ -50,7 +50,6 @@ class FeedUpdater(object):
                 for newsitem in news.entries[::-1]:
                     newstitle = newsitem.title
                     newsurl = newsitem.link
-#                    print datetime.datetime.now(), newsurl
 
                     # Try to get the published or updated date. Otherwise set it to 'no date'
                     try:

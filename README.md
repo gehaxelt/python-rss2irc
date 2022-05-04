@@ -7,7 +7,7 @@ This is a simple bot which fetches RSS feeds and posts them to an IRC channel.
 
 - python3
 - pip3
-- virtualenv (`pip3 install virtualenv`)
+- venv (`Available by default in Python 3.3+`)
 
 # Features
 
@@ -40,7 +40,7 @@ Help:
 Clone this repository and change into the directory. Create a new virtualenv and activate it:
 
 ```
-virtualenv -p python3 venv
+python3 -m venv venv
 source venv/bin/activate
 ```
 

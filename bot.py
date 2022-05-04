@@ -8,7 +8,6 @@ import re
 import sys
 import feedparser
 import datetime
-import dateutil.parser
 import requests
 from colour import Colours
 from db import FeedDB
@@ -203,10 +202,11 @@ class IRCBot(irc.bot.SingleServerIRCBot):
 
     def shorten(self, url):
         try: # Trying to shorten URL
-            sresponse = requests.get('https://v.gd/create.php?format=json&url=' + url)
-            surl = sresponse.json()['shorturl']
+            api = 'https://tinyurl.com/api-create.php?url='
+            sresponse = requests.get(api + url)
+            surl = sresponse.text
         except Exception as err:
-            print('A shortening error occurred.')
+            print('A shortening error occurred:', sresponse.status_code)
             surl = url
         return surl
 
