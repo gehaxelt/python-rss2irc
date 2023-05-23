@@ -1,5 +1,5 @@
 feedparser==6.0.2
 irc==19.0.1
 python_dateutil==2.8.1
-requests==2.25.1
+requests==2.31.0
 sqlite3worker==1.1.7
